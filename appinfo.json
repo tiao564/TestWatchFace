@@ -1,18 +1,31 @@
 {
-  "uuid": "0aa04211-c34b-457a-95bd-038590bbab9d",
-  "shortName": "watchface-test",
-  "longName": "watchface-test",
-  "companyName": "MakeAwesomeHappen",
-  "versionLabel": "1.0",
-  "sdkVersion": "3",
-  "targetPlatforms": ["aplite", "basalt"],
-  "watchapp": {
-    "watchface": false
-  },
-  "appKeys": {
-    "dummy": 0
-  },
-  "resources": {
-    "media": []
-  }
+    "appKeys": {
+        "dummy": 0
+    },
+    "capabilities": [
+        ""
+    ],
+    "companyName": "MakeAwesomeHappen",
+    "longName": "watchface-test",
+    "projectType": "native",
+    "resources": {
+        "media": [
+            {
+                "file": "fonts/perfect-dos-vga.ttf",
+                "name": "FONT_KEY_TEST_42",
+                "type": "font"
+            }
+        ]
+    },
+    "sdkVersion": "3",
+    "shortName": "watchface-test",
+    "targetPlatforms": [
+        "aplite",
+        "basalt"
+    ],
+    "uuid": "0aa04211-c34b-457a-95bd-038590bbab9d",
+    "versionLabel": "1.0",
+    "watchapp": {
+        "watchface": true
+    }
 }
