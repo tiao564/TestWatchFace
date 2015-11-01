@@ -1,9 +1,14 @@
 #include <pebble.h>
 
 //Global pointers
-static Window *s_main_window;   //Static means only for within this file
-static TextLayer *s_time_layer; //Time layer
+static Window *s_main_window;
+static TextLayer *s_time_layer;
 
+static BitmapLayer *s_background_layer;
+static GBitmap *s_background_bitmap;
+
+static GFont s_time_font;
+  
 static void main_window_load(Window *window);
 
 static void main_window_unload(Window *window); 
@@ -28,11 +33,15 @@ int main(void){
 
 //////////////
 //Functions //
-/////////////
+//////////////
+  //////////////
+  //Initiation//
+  //////////////
 static void init(){
   //Create main window element and assign to pointer
   s_main_window = window_create();
 
+  window_set_background_color(s_main_window, GColorBlack);
   //Set handlers to manage the elements inside the Window
   window_set_window_handlers(s_main_window,
     (WindowHandlers){
@@ -51,20 +60,44 @@ static void deinit(){
   window_destroy(s_main_window);
 }
 
+  ///////////////////
+  //Window handlers//
+  ///////////////////
 static void main_window_load(Window *window) {
   // Get information about the Window
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
-
+  
+  
+  
+  ////////////
+  //Creation//
+  ////////////
+  
   // Create the TextLayer with specific bounds
   s_time_layer = text_layer_create(
       GRect(0, PBL_IF_ROUND_ELSE(58, 52), bounds.size.w, 50));
+  
+    // Create GBitmap
+  s_background_bitmap = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BACKGROUND);
 
+  // Create BitmapLayer to display the GBitmap
+  s_background_layer = bitmap_layer_create(bounds);
+
+  // Set the bitmap onto the layer and add to the window
+  bitmap_layer_set_bitmap(s_background_layer, s_background_bitmap);
+  layer_add_child(window_layer, bitmap_layer_get_layer(s_background_layer));
+  
+  
+  // Set font to custom font
+  s_time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_PERFECT_DOS_48));
+  
   // Improve the layout to be more like a watchface
   text_layer_set_background_color(s_time_layer, GColorClear);
   text_layer_set_text_color(s_time_layer, GColorBlack);
   text_layer_set_text(s_time_layer, "00:00");
-  text_layer_set_font(s_time_layer, fonts_get_system_font(FONT_KEY_BITHAM_42_BOLD));
+  //text_layer_set_font(s_time_layer, fonts_get_system_font(FONT_KEY_BITHAM_42_BOLD));
+  text_layer_set_font(s_time_layer, s_time_font); //See line 64
   text_layer_set_text_alignment(s_time_layer, GTextAlignmentCenter);
 
   // Add it as a child layer to the Window's root layer
@@ -73,6 +106,9 @@ static void main_window_load(Window *window) {
 
 static void main_window_unload(Window *window){
   text_layer_destroy(s_time_layer);
+  fonts_unload_custom_font(s_time_font);
+  gbitmap_destroy(s_background_bitmap);
+  //gbitmap_layer_destroy(s_background_layer);
   
 }
 
