@@ -3,7 +3,7 @@
         "dummy": 0
     },
     "capabilities": [
-        ""
+        "location"
     ],
     "companyName": "MakeAwesomeHappen",
     "longName": "watchface-test",
@@ -14,6 +14,11 @@
                 "file": "images/background.png",
                 "name": "IMAGE_BACKGROUND",
                 "type": "png"
+            },
+            {
+                "file": "fonts/perfect-dos-vga.ttf",
+                "name": "FONT_PERFECT_DOS_20",
+                "type": "font"
             },
             {
                 "file": "fonts/perfect-dos-vga.ttf",

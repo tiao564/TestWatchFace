@@ -1,11 +1,15 @@
 #include <pebble.h>
-
+#define KEY_TEMPERATURE 0
+#define KEY_CONDITIONS 1
 //Global pointers
 static Window *s_main_window;
 static TextLayer *s_time_layer;
 
 static BitmapLayer *s_background_layer;
 static GBitmap *s_background_bitmap;
+
+static TextLayer *s_weather_layer;
+static GFont s_weather_font;
 
 static GFont s_time_font;
   
@@ -20,6 +24,15 @@ static void deinit();
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed);
 
 static void update_time();
+
+static void inbox_received_callback(DictionaryIterator *iterator, void *context);
+
+static void inbox_dropped_callback(AppMessageResult reason, void *context);
+
+static void inbox_failed_callback(DictionaryIterator *iterator, AppMessageResult reason, void *context);
+
+static void outbox_send_callback(DictionaryIterator *iterator, void *context);
+
 ////////
 //Main//
 ////////
@@ -37,6 +50,22 @@ int main(void){
   //////////////
   //Initiation//
   //////////////
+static void inbox_received_callback(DictionaryIterator *iterator, void *context){
+  
+}
+
+static void inbox_dropped_callback(AppMessageResult reason, void *context){
+  APP_LOG(APP_LOG_LEVEL_ERROR, "Message dropped!");
+}
+
+static void outbox_failed_callback(DictionaryIterator *iterator, AppMessageResult reason, void *context){
+  APP_LOG(APP_LOG_LEVEL_ERROR, "Outbox send failed!");
+}
+
+static void outbox_sent_callback(DictionaryIterator *iterator, void *context){
+  APP_LOG(APP_LOG_LEVEL_INFO, "Outbox send success!");
+}
+
 static void init(){
   //Create main window element and assign to pointer
   s_main_window = window_create();
@@ -88,6 +117,14 @@ static void main_window_load(Window *window) {
   bitmap_layer_set_bitmap(s_background_layer, s_background_bitmap);
   layer_add_child(window_layer, bitmap_layer_get_layer(s_background_layer));
   
+  // Set temperature layer
+  s_weather_layer = text_layer_create(
+    GRect(0, 120, bounds.size.w, 25));
+ 
+  ///////////////////////////////////
+  //Font handlers and customization//
+  ///////////////////////////////////
+  
   
   // Set font to custom font
   s_time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_PERFECT_DOS_48));
@@ -99,7 +136,28 @@ static void main_window_load(Window *window) {
   //text_layer_set_font(s_time_layer, fonts_get_system_font(FONT_KEY_BITHAM_42_BOLD));
   text_layer_set_font(s_time_layer, s_time_font); //See line 64
   text_layer_set_text_alignment(s_time_layer, GTextAlignmentCenter);
+  
+  // Style temperature text
+  text_layer_set_background_color(s_weather_layer, GColorClear);
+  text_layer_set_text_color(s_weather_layer, GColorWhite);
+  text_layer_set_text_alignment(s_weather_layer, GTextAlignmentCenter);
+  text_layer_set_text(s_weather_layer, "Loading...");
+  
+  // Style temperature font
+  s_weather_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_PERFECT_DOS_20));
+  text_layer_set_font(s_weather_layer, s_weather_font);
+  layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_weather_layer));
+  
+  // Register call backs
+  app_message_register_inbox_received(inbox_received_callback);
+  // Open app message
+  app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
+  app_message_register_inbox_dropped(inbox_dropped_callback);
+  app_message_register_outbox_failed(outbox_failed_callback);
+  app_message_register_outbox_sent(outbox_sent_callback);
+  
 
+  
   // Add it as a child layer to the Window's root layer
   layer_add_child(window_layer, text_layer_get_layer(s_time_layer));
 }
@@ -109,6 +167,8 @@ static void main_window_unload(Window *window){
   fonts_unload_custom_font(s_time_font);
   gbitmap_destroy(s_background_bitmap);
   //gbitmap_layer_destroy(s_background_layer);
+  text_layer_destroy(s_weather_layer);
+  fonts_unload_custom_font(s_weather_font);
   
 }
 
